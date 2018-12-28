@@ -1,7 +1,7 @@
 module.exports = api => {
     api.extendPackage({
         scripts: {
-            ssh2: 'vue-cli-service build && vue-cli-service ssh2'
+            ssh: 'vue-cli-service build && vue-cli-service ssh'
         },
         dependencies: {
             "archiver": "^3.0.0",

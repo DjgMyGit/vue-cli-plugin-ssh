@@ -1,21 +1,21 @@
-# vue-cli-plugin-ssh2
+# vue-cli-plugin-ssh
 
-vue-cli-plugin for ssh2
+vue-cli3 ssh插件
 
-## Installation
+## 安装
 
-via command line
+命令
 
-    vue add ssh2
+    vue add ssh
 
-## Before Use
+## 使用准备
 
-add this to your `vue.config.js` in  `pluginOptions`
+向你的 `vue.config.js` 文件的 `pluginOptions`对象上添加一些配置
 
 ```javascrit
 module.exports = {
     pluginOptions: {
-        ssh2:{
+        ssh:{
             projectName: 'projectName',
             host: 'localhost',
             port: 22,
@@ -28,24 +28,24 @@ module.exports = {
 }
 ```
 
-## Command Line Setting
+## 命令行模式下的一些配置
 
 ---
-Add command to 'scripts' part of package.json
+请保证 `package.json`  文件的`scripts` 下有 `ssh`命令
 
 ```json
 
 "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "ssh2": "vue-cli-service build && vue-cli-service ssh2"
+    "ssh": "vue-cli-service build && vue-cli-service ssh"
 },
 ```
 
-Now you can
+现在使用命令行运行
 
-    npm run ssh2
+    npm run ssh
 
-or
+或者
 
-    yarn ssh2
+    yarn ssh

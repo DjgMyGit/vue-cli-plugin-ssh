@@ -15,11 +15,11 @@ module.exports = (api, projectOptions) => {
         // 或返回通过 webpack-merge 合并的配置对象
     })
 
-    api.registerCommand('ssh2', args => {
+    api.registerCommand('ssh', args => {
         // 注册 `vue-cli-service test`
-        if (!projectOptions.pluginOptions.ssh2) {
+        if (!projectOptions.pluginOptions.ssh) {
             throw new Error(`请在vue.config.js 里的 pluginOptions 配置
-                ssh2: {
+                ssh: {
                     projectName: 'projectName',
                     host: 'localhost',
                     port: 22,
@@ -30,10 +30,10 @@ module.exports = (api, projectOptions) => {
                 }
             `)
         }
-        let config = projectOptions.pluginOptions.ssh2;
+        let config = projectOptions.pluginOptions.ssh;
         console.log(api.service.context)
-        let ssh23 = new SSH2ToServer(config, conn, api.service.context);
-        ssh23.Tar();
+        let sshObj = new SSH2ToServer(config, conn, api.service.context);
+        sshObj.Tar();
 
     })
 }

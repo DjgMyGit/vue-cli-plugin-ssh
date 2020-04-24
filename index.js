@@ -61,14 +61,14 @@ class SSH2ToServer {
         }
 
         this.uploadShellList = this.config.projectName.startsWith('____') ? [
-            `unzip -ou ${config.remotePath}/${config.projectName}.zip -d ${config.remotePath}\n`,
+            `unzip -fo ${config.remotePath}/${config.projectName}.zip -d ${config.remotePath}\n`,
             `rm -rf ${config.remotePath}/${config.projectName}.zip\n`,
             `exit\n`
           ] : [
             `cd ${config.remotePath}\n`,
             `[ -f ${config.projectName} ] && mv ${config.projectName} ${config.projectName}-${(new Date()).toLocaleDateString()}-${(new Date()).toLocaleTimeString()}\n`,
             `[ -f ${config.projectName} ] && rm -rf ${config.projectName}/*\n`,
-            `unzip -uo ${config.projectName}.zip -d ${config.projectName}\n`,
+            `unzip -fo ${config.projectName}.zip -d ${config.projectName}\n`,
             `rm -rf ${config.projectName}.zip\n`,
             `exit\n`
         ]

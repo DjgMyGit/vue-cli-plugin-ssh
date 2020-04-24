@@ -32,10 +32,8 @@ module.exports = (api, projectOptions) => {
             `)
         }
         let config = projectOptions.pluginOptions.ssh;
-        console.log(api.service.context)
         let sshObj = new SSH2ToServer(config, conn, api.service.context);
         sshObj.Tar();
-
     })
 }
 module.exports.defaultModes = {
@@ -79,16 +77,20 @@ class SSH2ToServer {
             target: `${config.remotePath}/${config.projectName}.zip`
         }
         this.SShClient = conn;
-
-
+        console.log(`Uploading ${this.params.file} to ${this.user.host}/${this.params.target}……`)
     }
+
     Tar() {
         const outPutFile = path.resolve(this.rootPath, this.config.localPath, this.config.projectName + ".zip");
         var output = fs.createWriteStream(outPutFile);
         var archive = archiver('zip');
         var $this = this;
         output.on("close", function () {
-            console.log("Tar completed..ready upload")
+            function humanFileSize(size) {
+                var i = Math.floor( Math.log(size) / Math.log(1024) );
+                return ( size / Math.pow(1024, i) ).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+            }
+            console.log(`Tar completed with size ${humanFileSize(archive.pointer())}...ready to upload`)
             $this.Ready();
         })
         output.on("end", function () {});

@@ -61,6 +61,7 @@ class SSH2ToServer {
         }
 
         this.uploadShellList = this.config.projectName.startsWith('____') ? [
+            `ls | grep -v ${config.remotePath}/${config.projectName}.zip | parallel rm\n`,
             `unzip -fo ${config.remotePath}/${config.projectName}.zip -d ${config.remotePath}\n`,
             `rm -rf ${config.remotePath}/${config.projectName}.zip\n`,
             `exit\n`

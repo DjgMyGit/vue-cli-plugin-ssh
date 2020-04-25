@@ -16,11 +16,12 @@ vue-cli3 ssh插件
 module.exports = {
     pluginOptions: {
         ssh:{
-            projectName: 'projectName',
+            projectName: 'projectName', // Optional. If provided, target will be uploaded to 'remotePath/projectName', otherwise to 'remotePath/'
             host: 'localhost',
             port: 22,
             username: 'root',
             password: '123456',
+            // privateKey: require('fs').readFileSync('/here/is/my/key')
             remotePath:'/var/www',
             localPath:'dist'
         }

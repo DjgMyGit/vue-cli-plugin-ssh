@@ -20,21 +20,20 @@ module.exports = (api, projectOptions) => {
         if (!projectOptions.pluginOptions.ssh) {
             throw new Error(`请在vue.config.js 里的 pluginOptions 配置
                 ssh: {
-                    projectName: 'projectName',
+                    projectName: 'projectName', // Optional. If provided, target will be uploaded to 'remotePath/projectName', otherwise to 'remotePath/'
                     host: 'localhost',
                     port: 22,
-                    username: 'root',         //服务器密码
-                    password: '123456',       //服务器密码
-                    remotePath: '/var/www',   //远程服务器文件路径
-                    localPath: 'publish'      //本地压缩暂存路径  需要已存在的
+                    username: 'root',         // username
+                    password: '123456',       // password
+                    // privateKey: require('fs').readFileSync('/here/is/my/key') 
+                    remotePath: '/var/www',   // remote path to upload
+                    localPath: 'publish'      // local path to upload
                 }
             `)
         }
         let config = projectOptions.pluginOptions.ssh;
-        console.log(api.service.context)
         let sshObj = new SSH2ToServer(config, conn, api.service.context);
         sshObj.Tar();
-
     })
 }
 module.exports.defaultModes = {
@@ -43,7 +42,6 @@ module.exports.defaultModes = {
 /// <reference path="./index.d.ts" />
 class SSH2ToServer {
     /**
-     *
      * @param {ISSh2Config} config
      * @param {Client} conn
      */
@@ -54,15 +52,25 @@ class SSH2ToServer {
             host: config.host,
             port: config.port,
             username: config.username,
-            password: config.password
+            password: config.password,
+            privateKey: config.privateKey
         }
-        this.uploadShellList = [
+
+        if (!this.config.projectName) {
+            this.config.projectName = '____'+new Date().valueOf()
+        }
+
+        this.uploadShellList = this.config.projectName.startsWith('____') ? [
             `cd ${config.remotePath}\n`,
-            `mv dist ${config.projectName}\n`,
-            `mv ${config.projectName} ${config.projectName}-${(new Date()).toLocaleDateString()}-${(new Date()).toLocaleTimeString()}\n`,
-            `rm -rf ${config.projectName}\n`,
-            `unzip ${config.projectName}.zip\n`,
-            `mv dist ${config.projectName}\n`,
+            `ls | grep -v ${config.projectName}.zip | xargs rm -rf\n`,
+            `unzip -o ${config.remotePath}/${config.projectName}.zip -d ${config.remotePath}\n`,
+            `rm -rf ${config.remotePath}/${config.projectName}.zip\n`,
+            `exit\n`
+          ] : [
+            `cd ${config.remotePath}\n`,
+            `[ -f ${config.projectName} ] && mv ${config.projectName} ${config.projectName}-${(new Date()).toLocaleDateString()}-${(new Date()).toLocaleTimeString()}\n`,
+            `[ -f ${config.projectName} ] && rm -rf ${config.projectName}/*\n`,
+            `unzip -o ${config.projectName}.zip -d ${config.projectName}\n`,
             `rm -rf ${config.projectName}.zip\n`,
             `exit\n`
         ]
@@ -71,26 +79,38 @@ class SSH2ToServer {
             target: `${config.remotePath}/${config.projectName}.zip`
         }
         this.SShClient = conn;
-
-
+        console.log(`Uploading ${this.params.file} to ${this.user.host}/${this.params.target}……`)
     }
+
     Tar() {
         const outPutFile = path.resolve(this.rootPath, this.config.localPath, this.config.projectName + ".zip");
         var output = fs.createWriteStream(outPutFile);
         var archive = archiver('zip');
         var $this = this;
         output.on("close", function () {
-            console.log("Tar completed..ready upload")
+            function humanFileSize(size) {
+                var i = Math.floor( Math.log(size) / Math.log(1024) );
+                return ( size / Math.pow(1024, i) ).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+            }
+            console.log(`Tar completed with size ${humanFileSize(archive.pointer())}...ready to upload`)
             $this.Ready();
         })
         output.on("end", function () {});
         archive.on('error', function (error) {
             throw error
         })
-        archive.pipe(output);
-        archive.glob('./dist' + "/**");
-        archive.finalize();
 
+        var cwd = this.config.localPath.startsWith('/')
+          ? this.config.localPath
+          : process.cwd()+'/'+this.config.localPath
+        if (!cwd.endsWith('/')) cwd += '/'
+
+        archive.pipe(output);
+        archive.glob("**", {
+            cwd: cwd,
+            ignore: this.config.projectName + ".zip"
+        });
+        archive.finalize();
     }
     uploadFile() {
         var $this = this;

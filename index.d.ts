@@ -4,6 +4,7 @@ interface ISSh2Config {
     port: number;
     username: string;
     password: string,
-    remotePath:string,
-    localPath:string,
+    privateKey: string,
+    remotePath: string,
+    localPath: string
 }
